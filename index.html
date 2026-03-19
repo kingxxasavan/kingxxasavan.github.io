@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>StudyAI</title></head>
+<body style="margin:0;background:#111110;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:system-ui,sans-serif">
+
+<!-- PASSWORD GATE -->
+<div id="gate" style="position:fixed;inset:0;background:#111110;display:flex;align-items:center;justify-content:center;z-index:9999">
+  <div style="background:#1c1c1a;border:.5px solid rgba(255,255,255,.09);border-radius:16px;padding:32px 28px;width:320px;text-align:center">
+    <div style="font-size:22px;font-weight:600;color:#f0efe8;margin-bottom:4px">Study<span style="color:#D85A30">AI</span></div>
+    <div style="font-size:12px;color:#545350;margin-bottom:24px">Enter your access code to continue</div>
+    <input id="pw-in" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')checkPW()"
+      style="width:100%;background:#252523;border:.5px solid rgba(255,255,255,.09);border-radius:10px;padding:10px 14px;font-size:13px;color:#f0efe8;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:10px;transition:border-color .15s"
+      onfocus="this.style.borderColor='#D85A30'" onblur="this.style.borderColor='rgba(255,255,255,.09)'"/>
+    <div id="pw-err" style="font-size:11px;color:#ef4444;height:16px;margin-bottom:8px"></div>
+    <button onclick="checkPW()"
+      style="width:100%;background:#D85A30;color:#fff;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:background .1s"
+      onmouseover="this.style.background='#c04e28'" onmouseout="this.style.background='#D85A30'">
+      Unlock →
+    </button>
+  </div>
+</div>
+
+<!-- MAIN APP (hidden until auth) -->
+<div id="main-app" style="display:none;width:100%;max-width:1200px;margin:auto;padding:20px;box-sizing:border-box">
+
+<script>
+// ── SET YOUR PASSWORD HERE ──────────────────────────────
+const SITE_PASSWORD = '#Kingsavan837$';
+// ───────────────────────────────────────────────────────
+
+function checkPW(){
+  const val = document.getElementById('pw-in').value;
+  const err = document.getElementById('pw-err');
+  if(val === SITE_PASSWORD){
+    sessionStorage.setItem('sa_auth','1');
+    document.getElementById('gate').style.display='none';
+    document.getElementById('main-app').style.display='block';
+  } else {
+    err.textContent = 'Incorrect password. Try again.';
+    document.getElementById('pw-in').value='';
+    document.getElementById('pw-in').focus();
+    setTimeout(()=>err.textContent='',2500);
+  }
+}
+
+// Auto-unlock if already authenticated this session
+if(sessionStorage.getItem('sa_auth')==='1'){
+  document.getElementById('gate').style.display='none';
+  document.getElementById('main-app').style.display='block';
+} else {
+  setTimeout(()=>document.getElementById('pw-in').focus(),100);
+}
+</script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+#app{--bp:#fff;--bs:#f6f5f2;--bt:#eeecea;--tp:#191815;--ts:#636158;--tt:#a09e98;--bdt:rgba(0,0,0,.1);--bds:rgba(0,0,0,.18);--ac:#D85A30;--pd:12px;--gap:10px;display:flex;min-height:600px;background:var(--bt);color:var(--tp);font-family:var(--font-sans,system-ui,sans-serif);border-radius:12px;border:.5px solid var(--bdt);overflow:hidden;position:relative}
+#app.dk{--bp:#1c1c1a;--bs:#252523;--bt:#111110;--tp:#f0efe8;--ts:#908e86;--tt:#545350;--bdt:rgba(255,255,255,.09);--bds:rgba(255,255,255,.16)}
+#app.dense{--pd:8px;--gap:7px}
+#sb{width:206px;min-width:0;background:var(--bs);border-right:.5px solid var(--bdt);display:flex;flex-direction:column;overflow:hidden;transition:width .22s cubic-bezier(.4,0,.2,1)}
+#sb.col{width:42px}
+.sb-in{width:206px;display:flex;flex-direction:column;height:100%;padding:11px 0;overflow-y:auto;overflow-x:hidden}
+#sb.col .hc{display:none}
+.slo{padding:0 11px 11px;border-bottom:.5px solid var(--bdt);margin-bottom:7px;font-size:14px;font-weight:500;white-space:nowrap}
+.slbl{font-size:9px;color:var(--tt);letter-spacing:.07em;text-transform:uppercase;padding:0 11px 4px;font-weight:500;white-space:nowrap}
+.si{display:flex;align-items:center;gap:7px;padding:5px 6px;font-size:12px;cursor:pointer;color:var(--ts);border-radius:7px;margin:1px 5px;transition:all .1s;white-space:nowrap}
+.si:hover,.si.on{background:var(--bp);color:var(--tp)}
+.si.on{border:.5px solid var(--bdt)}
+.si svg{flex-shrink:0}
+.sdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.icbtn{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:7px;cursor:pointer;border:.5px solid var(--bdt);background:transparent;color:var(--ts);transition:all .1s;flex-shrink:0;font-family:inherit}
+.icbtn:hover{background:var(--bs);color:var(--tp)}
+.icbtn.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+#mn{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.topb{display:flex;align-items:center;gap:8px;padding:13px 17px 0;flex-shrink:0}
+.ptt{font-size:16px;font-weight:500;flex:1;transition:opacity .15s}
+.srch-pill{display:flex;align-items:center;border-radius:8px;border:.5px solid transparent;background:transparent;overflow:hidden;transition:all .25s cubic-bezier(.4,0,.2,1);width:26px;height:26px;position:relative}
+.srch-pill.open{width:200px;border-color:var(--ac);background:var(--bs)}
+.srch-ico-btn{width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;color:var(--ts);border-radius:7px;border:.5px solid var(--bdt);background:transparent;transition:all .1s}
+.srch-pill.open .srch-ico-btn{border-color:transparent;color:var(--ac)}
+.srch-ico-btn:hover{background:var(--bs);color:var(--tp)}
+.srch-real{border:none;background:transparent;outline:none;font-size:12px;color:var(--tp);font-family:inherit;width:0;opacity:0;transition:width .25s cubic-bezier(.4,0,.2,1),opacity .2s;padding:0;pointer-events:none}
+.srch-pill.open .srch-real{width:150px;opacity:1;padding:0 8px 0 2px;pointer-events:all}
+.srch-drop{position:absolute;top:calc(100% + 8px);right:0;width:260px;background:var(--bp);border:.5px solid var(--bds);border-radius:10px;z-index:40;overflow:hidden;max-height:260px;overflow-y:auto}
+.srch-item{padding:8px 13px;cursor:pointer;border-bottom:.5px solid var(--bdt)}
+.srch-item:last-child{border-bottom:none}
+.srch-item:hover{background:var(--bs)}
+.srch-itag{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;padding:1px 5px;border-radius:3px;margin-right:6px}
+.cnt{padding:11px 17px 20px;transition:opacity .14s ease,transform .14s ease;overflow-y:auto;flex:1}
+.cnt.out{opacity:0;transform:translateY(5px)}
+.cnt.msgs-view{padding:0;display:flex;overflow:hidden}
+.cd{background:var(--bp);border:.5px solid var(--bdt);border-radius:12px;padding:var(--pd) 14px;margin-bottom:var(--gap)}
+.clbl{font-size:9px;font-weight:500;color:var(--tt);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:.5px solid var(--bds);background:transparent;color:var(--tp);font-family:inherit;transition:all .1s}
+.btn:hover{background:var(--bs)}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.bta{background:var(--ac);color:#fff;border-color:var(--ac)}
+.bta:hover{background:#c04e28;border-color:#c04e28}
+.btg{background:#10b98122;color:#10b981;border-color:#10b98144}
+.btg:hover{background:#10b98133}
+.btsm{padding:3px 9px;font-size:11px}
+input,textarea,select{background:var(--bs);border:.5px solid var(--bds);border-radius:8px;padding:6px 10px;font-size:12px;color:var(--tp);font-family:inherit;outline:none;width:100%;transition:border-color .1s}
+input:focus,textarea:focus,select:focus{border-color:var(--ac)}
+textarea{resize:vertical;line-height:1.5}
+.flbl{font-size:9px;font-weight:500;color:var(--ts);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.fg{margin-bottom:10px}
+.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--gap);margin-bottom:var(--gap)}
+.scd{background:var(--bs);border-radius:8px;padding:10px 12px}
+.snum{font-size:21px;font-weight:500}
+.slab{font-size:10px;color:var(--ts);margin-top:2px}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--gap)}
+.ri{display:flex;align-items:center;gap:9px;padding:6px 0;border-bottom:.5px solid var(--bdt);cursor:pointer}
+.ri:last-child{border-bottom:none;padding-bottom:0}
+.tabs{display:flex;gap:2px;background:var(--bs);padding:2px;border-radius:8px;width:fit-content;margin-bottom:11px;border:.5px solid var(--bdt);flex-wrap:wrap}
+.tab{padding:4px 9px;font-size:11px;cursor:pointer;color:var(--ts);border-radius:6px;transition:all .1s}
+.tab.on{background:var(--bp);color:var(--tp)}
+.di{display:flex;align-items:center;gap:9px;padding:8px 11px;background:var(--bp);border:.5px solid var(--bdt);border-radius:8px;cursor:pointer;margin-bottom:6px;transition:border-color .1s}
+.di:hover{border-color:var(--bds)}
+.chk{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--bds);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .1s}
+.chk.ck{background:var(--ac);border-color:var(--ac)}
+.bk{font-size:11px;color:var(--ts);cursor:pointer;padding:3px 8px;border-radius:7px;display:inline-flex;align-items:center;gap:4px;margin-bottom:10px}
+.bk:hover{background:var(--bs);color:var(--tp)}
+.ov{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:50}
+.mb{background:var(--bp);border:.5px solid var(--bds);border-radius:12px;padding:15px;width:420px;max-width:93%;max-height:93%;overflow-y:auto}
+.mtt{font-size:13px;font-weight:500;margin-bottom:11px}
+.mac{display:flex;gap:7px;justify-content:flex-end;margin-top:11px}
+.csws{display:flex;gap:6px;flex-wrap:wrap}
+.csws div{width:20px;height:20px;border-radius:50%;cursor:pointer;border:2.5px solid transparent;transition:all .1s}
+.csws div.sel{border-color:var(--tp);transform:scale(1.15)}
+.ld{display:inline-flex;gap:3px;align-items:center}
+.ld span{width:4px;height:4px;background:var(--ac);border-radius:50%;animation:lda 1s infinite}
+.ld span:nth-child(2){animation-delay:.15s}
+.ld span:nth-child(3){animation-delay:.3s}
+@keyframes lda{0%,80%,100%{opacity:.3;transform:scale(1)}40%{opacity:1;transform:scale(1.3)}}
+.emp{text-align:center;padding:18px 12px;color:var(--tt);font-size:12px}
+.clsh{display:flex;align-items:center;gap:10px;margin-bottom:13px;padding-bottom:11px;border-bottom:.5px solid var(--bdt)}
+.clsb{width:3px;height:28px;border-radius:2px;flex-shrink:0}
+.fuz{border:.5px dashed var(--bds);border-radius:8px;padding:10px;text-align:center;cursor:pointer;transition:all .1s;margin-bottom:6px;color:var(--ts);font-size:12px}
+.fuz:hover{border-color:var(--ac);background:var(--bs)}
+.sh2{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:.04em}
+.tag-pkt{background:#D85A3022;color:#D85A30}
+.tag-txt{background:#10b98122;color:#10b981}
+.fb-chip{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:500;padding:4px 10px;border-radius:20px;cursor:pointer;border:.5px solid var(--bdt);background:var(--bs);color:var(--ts);transition:all .1s;margin:3px}
+.fb-chip:hover{background:var(--bp);color:var(--tp)}
+.fb-chip.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.pdf-btn{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:7px;font-size:11px;font-weight:500;cursor:pointer;border:.5px solid var(--bdt);background:var(--bs);color:var(--ts);transition:all .1s;font-family:inherit}
+.pdf-btn:hover{background:var(--bp);color:var(--tp)}
+.fc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:10px;margin-top:11px}
+.fc{height:126px;perspective:600px;cursor:pointer}
+.fc-in{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .38s cubic-bezier(.4,0,.2,1)}
+.fc.flip .fc-in{transform:rotateY(180deg)}
+.fc-f,.fc-b{position:absolute;inset:0;border-radius:10px;border:.5px solid var(--bdt);padding:13px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.fc-f{background:var(--bp)}
+.fc-b{background:var(--bs);transform:rotateY(180deg)}
+.fc-q{font-size:11px;font-weight:500;line-height:1.5}
+.fc-a{font-size:11px;line-height:1.5;color:var(--ts)}
+.fc-lbl{font-size:8px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:5px;color:var(--tt)}
+.cdown-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:var(--gap);margin-bottom:var(--gap)}
+.cdown-card{background:var(--bp);border:.5px solid var(--bdt);border-radius:10px;padding:11px 13px;position:relative}
+.cdown-n{font-size:24px;font-weight:500}
+.cdown-l{font-size:10px;color:var(--ts);margin-top:1px}
+.cdown-name{font-size:11px;font-weight:500;margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.urgent{border-color:var(--ac)}
+.pkt-wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-bottom:11px}
+.pkt-panel{background:var(--bp);border:.5px solid var(--bdt);border-radius:12px;padding:12px 13px;display:flex;flex-direction:column}
+.pkt-ph{font-size:11px;font-weight:500;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
+.pkt-content{font-size:11px;line-height:1.7;color:var(--ts);white-space:pre-wrap;overflow-y:auto;max-height:160px;min-height:60px}
+.chat-bubble{padding:8px 11px;border-radius:10px;margin-bottom:5px;font-size:12px;line-height:1.5;max-width:75%}
+.chat-bubble.me{background:var(--ac);color:#fff;border-radius:10px 10px 3px 10px;align-self:flex-end;margin-left:auto}
+.chat-bubble.them{background:var(--bp);border:.5px solid var(--bdt);border-radius:10px 10px 10px 3px}
+.collab-card{background:var(--bs);border:.5px solid var(--bdt);border-radius:10px;padding:11px 13px;margin:3px 0;min-width:200px}
+.wt-badge{display:inline-flex;align-items:center;font-size:9px;font-weight:600;padding:1px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:.05em}
+.wt-perform{background:#D85A3020;color:#D85A30}
+.wt-rehearse{background:#f59e0b20;color:#f59e0b}
+.wt-prepare{background:#10b98120;color:#10b981}
+.wt-group{margin-bottom:14px}
+.wt-hdr{display:flex;align-items:center;gap:8px;margin-bottom:7px;padding-bottom:5px;border-bottom:.5px solid var(--bdt)}
+.wt-hdr-name{font-size:11px;font-weight:500}
+.ait{display:flex;align-items:center;gap:9px;padding:7px 11px;background:var(--bp);border:.5px solid var(--bdt);border-radius:8px;margin-bottom:5px}
+.qap{padding:9px 11px;background:var(--bs);border-radius:8px;margin-bottom:6px;border:.5px solid var(--bdt)}
+.qqq{font-size:10px;font-weight:500;color:var(--ac);margin-bottom:3px}
+.qqa{font-size:12px;line-height:1.6}
+.enc-badge{display:inline-flex;align-items:center;gap:4px;font-size:9px;color:var(--tt);padding:2px 7px;border-radius:4px;background:var(--bs);border:.5px solid var(--bdt)}
+.onl-dot{width:8px;height:8px;border-radius:50%;background:#10b981;border:1.5px solid var(--bs);flex-shrink:0}
+.attach-menu{position:absolute;bottom:calc(100% + 6px);left:0;background:var(--bp);border:.5px solid var(--bds);border-radius:10px;overflow:hidden;z-index:30;min-width:170px}
+.attach-opt{display:flex;align-items:center;gap:8px;padding:9px 13px;cursor:pointer;font-size:12px;transition:background .1s}
+.attach-opt:hover{background:var(--bs)}
+.calw{display:grid;grid-template-columns:minmax(0,1fr) 205px;gap:11px}
+.calh{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.calm{font-size:13px;font-weight:500}
+.calnb{background:var(--bs);border:.5px solid var(--bdt);color:var(--tp);width:23px;height:23px;border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;font-family:inherit}
+.calnb:hover{background:var(--bp)}
+.calg{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px}
+.caldl{text-align:center;font-size:8px;color:var(--tt);padding:3px 0;text-transform:uppercase;font-weight:500}
+.calc{min-height:50px;background:var(--bp);border:.5px solid var(--bdt);border-radius:5px;padding:3px}
+.calc.em{background:transparent;border-color:transparent}
+.calc.tod{border-color:var(--ac)}
+.caldn{font-weight:500;font-size:10px;margin-bottom:1px}
+.caldn.tn{color:var(--ac)}
+.calev{font-size:7px;padding:1px 3px;border-radius:2px;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.section-out{background:var(--bs);border:.5px solid var(--bdt);border-radius:10px;padding:11px 13px;margin-top:9px}
+.section-lbl{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ac);margin-bottom:5px}
+.section-body{font-size:12px;line-height:1.7;white-space:pre-wrap}
+</style>
+
+<div id="app">
+  <div id="sb">
+    <div class="sb-in">
+      <div class="slo hc">Study<span style="color:var(--ac)">AI</span></div>
+      <div style="padding:0 5px;margin-bottom:6px" class="hc">
+        <div class="slbl">Menu</div>
+        <div class="si on" id="sn-dashboard" onclick="gNav('dashboard')"><svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><rect x="0" y="0" width="5" height="5" rx="1.5"/><rect x="7" y="0" width="5" height="5" rx="1.5"/><rect x="0" y="7" width="5" height="5" rx="1.5"/><rect x="7" y="7" width="5" height="5" rx="1.5"/></svg>Dashboard</div>
+        <div class="si" id="sn-messages" onclick="gNav('messages')"><svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M10.5 1H1.5A1.5 1.5 0 000 2.5v6A1.5 1.5 0 001.5 10H3l1.5 2L6 10h4.5A1.5 1.5 0 0012 8.5v-6A1.5 1.5 0 0010.5 1z"/></svg>Messages<span id="msg-badge" style="display:none;margin-left:auto;background:var(--ac);color:#fff;font-size:9px;font-weight:600;padding:1px 5px;border-radius:8px">2</span></div>
+        <div class="si" id="sn-chat" onclick="gNav('chat')"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.2"/><path d="M4 6h4M6 4v4" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>AI Chat</div>
+        <div class="si" id="sn-write" onclick="gNav('write')"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2L4 10H2v-2l6.5-6.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>Writing Lab</div>
+        <div class="si" id="sn-summarize" onclick="gNav('summarize')"><svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><rect x="1" y="1" width="10" height="2" rx="1"/><rect x="1" y="5" width="7" height="2" rx="1"/><rect x="1" y="9" width="10" height="2" rx="1"/></svg>Summarizer</div>
+        <div class="si" id="sn-schedule" onclick="gNav('schedule')"><svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><rect x="0" y="0" width="12" height="2" rx="1"/><rect x="0" y="5" width="12" height="2" rx="1"/><rect x="0" y="10" width="8" height="2" rx="1"/></svg>Schedule</div>
+        <div class="si" id="sn-calendar" onclick="gNav('calendar')"><svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M3 0a.5.5 0 01.5.5V1h5V.5a.5.5 0 011 0V1H10A1.5 1.5 0 0111.5 2.5V10A1.5 1.5 0 0110 11.5H2A1.5 1.5 0 01.5 10V2.5A1.5 1.5 0 012 1h.5V.5A.5.5 0 013 0zm-1.5 4v6h9V4h-9z"/></svg>Calendar</div>
+      </div>
+      <div style="padding:0 5px;flex:1" class="hc">
+        <div class="slbl">Classes</div>
+        <div id="scls"></div>
+        <div class="si" onclick="omod('add-class')" style="color:var(--tt);font-size:12px"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Add class</div>
+      </div>
+    </div>
+  </div>
+  <div id="mn" style="display:flex;flex-direction:column;min-width:0;overflow:hidden;flex:1">
+    <div class="topb">
+      <button class="icbtn" onclick="toggleSB()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1 2.5h11M1 6.5h7M1 10.5h11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+      <div class="ptt" id="ptt">Dashboard</div>
+      <div class="srch-pill" id="srch-pill">
+        <div class="srch-ico-btn" onclick="toggleSearch()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.3"/><path d="M9.5 9.5l2.5 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+        <input class="srch-real" id="srch" placeholder="Search everything..." oninput="onSearch(this.value)" onblur="onBlur()"/>
+        <div class="srch-drop" id="srch-drop" style="display:none"></div>
+      </div>
+      <button class="icbtn" id="densebtn" onclick="toggleDense()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1" y="2" width="11" height="1.5" rx=".5" fill="currentColor"/><rect x="1" y="5.75" width="11" height="1.5" rx=".5" fill="currentColor"/><rect x="1" y="9.5" width="11" height="1.5" rx=".5" fill="currentColor"/></svg></button>
+      <button class="icbtn" onclick="toggleTheme()"><svg id="thico" width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M11.8 8.8A5.3 5.3 0 016 3.2 5.3 5.3 0 1011 11a3.9 3.9 0 00.8-2.2z" fill="currentColor"/></svg></button>
+    </div>
+    <div class="cnt" id="cnt"></div>
+  </div>
+  <div id="mcon" style="display:none" class="ov" onclick="cmod(event)"><div class="mb" onclick="event.stopPropagation()" id="min"></div></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
+<script>
+if(typeof pdfjsLib!=='undefined')pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+const ACOLS=['#D85A30','#10b981','#6366f1','#f59e0b','#ef4444','#06b6d4','#8b5cf6','#ec4899'];
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DSHT=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const WT={perform:{label:'Perform',cls:'wt-perform',col:'#D85A30'},rehearse:{label:'Rehearse',cls:'wt-rehearse',col:'#f59e0b'},prepare:{label:'Prepare',cls:'wt-prepare',col:'#10b981'}};
+let selCol=ACOLS[0],sbOpen=true,srchOpen=false,dropTmr=null,flipSt={},showAttach=false;
+let S={
+  dk:false,dense:false,view:'dashboard',
+  selContact:'u1',msgInputs:{},showAttachMenu:false,
+  contacts:[
+    {id:'u1',name:'Alex Chen',initials:'AC',color:'#6366f1',online:true},
+    {id:'u2',name:'Maya Torres',initials:'MT',color:'#10b981',online:false,lastSeen:'2h ago'},
+    {id:'u3',name:'Jordan Lee',initials:'JL',color:'#f59e0b',online:true}
+  ],
+  threads:{
+    u1:[
+      {id:1,role:'them',type:'text',content:'Hey! Did you get the APUSH notes for ch.23?',time:'2:30 PM'},
+      {id:2,role:'me',type:'text',content:'Yeah I uploaded them to the app, checking topic 7.3 rn',time:'2:31 PM'},
+      {id:3,role:'them',type:'text',content:'Nice. Want to collab on the DBQ essay?',time:'2:32 PM'}
+    ],
+    u2:[{id:1,role:'them',type:'text',content:'Can you share the chem lab notes?',time:'Yesterday'}],
+    u3:[]
+  },
+  collabInvites:{},
+  collabWorkspace:{},
+  activeWorkspaceId:null,
+  chatMsgs:[],chatLoading:false,
+  writeInput:'',writeTone:'essay',writeOut:null,writeLoading:false,
+  sumInput:'',sumOut:'',sumLoading:false,
+  classes:[
+    {id:1,name:'APUSH',color:'#D85A30',
+      docs:[{id:1,name:'Period 7 Notes',content:'Topic 7.3 - Progressive Era Reforms\n- Sherman Antitrust Act enforcement\n- Pure Food and Drug Act (1906)\n- 16th Amendment: income tax (1913)\n- 17th Amendment: direct election of senators\n- 19th Amendment: womens suffrage (1920)\nKey figures: Teddy Roosevelt, Woodrow Wilson, Jane Addams.',qa:[]}],
+      assignments:[
+        {id:1,title:'DBQ: Progressive Era',dueDate:'2026-03-25',done:false,weight:'perform'},
+        {id:2,title:'Read Ch. 23',dueDate:'2026-03-20',done:false,weight:'prepare'},
+        {id:3,title:'Period 7 Quiz',dueDate:'2026-03-22',done:false,weight:'rehearse'},
+        {id:4,title:'Class Notes — Topic 7.4',dueDate:'2026-03-19',done:false,weight:'prepare'}
+      ],
+      packets:[{id:1,name:'Period 7 Packet',questions:'Q1: Goals of Progressive movement?\nQ2: How did TR use the Sherman Antitrust Act?\nQ3: Significance of 16th & 17th Amendments?\nQ4: What led US to enter WWI?\nQ5: How did government limit civil liberties during WWI?',textbook:'',messages:[]}],
+      flashcards:[],schedule:[{id:1,day:1,start:'08:00',end:'09:30',room:'Room 214'},{id:2,day:3,start:'08:00',end:'09:30',room:'Room 214'}]},
+    {id:2,name:'Chemistry',color:'#6366f1',
+      docs:[],assignments:[{id:5,title:'Lab Report',dueDate:'2026-03-22',done:false,weight:'perform'},{id:6,title:'Pre-lab worksheet',dueDate:'2026-03-21',done:false,weight:'prepare'}],
+      packets:[],flashcards:[],schedule:[{id:3,day:2,start:'10:00',end:'11:30',room:'Sci 302'}]},
+    {id:3,name:'English',color:'#10b981',
+      docs:[],assignments:[{id:7,title:'Essay Draft',dueDate:'2026-04-01',done:false,weight:'rehearse'},{id:8,title:'Final Essay',dueDate:'2026-04-15',done:false,weight:'perform'}],
+      packets:[],flashcards:[],schedule:[{id:4,day:1,start:'11:00',end:'12:30',room:'Eng 101'}]}
+  ],
+  selClassId:null,selDocId:null,selPktId:null,classTab:'docs',
+  calY:2026,calM:2,
+  qaLoading:false,pktLoading:false,fcLoading:false,
+  examDates:[{id:1,name:'AP US History Exam',date:'2026-05-09',color:'#D85A30'}],
+  schoolEvents:[{id:1,title:'Spring Break',date:'2026-03-20',color:'#6366f1'},{id:2,title:'Midterms',date:'2026-04-01',color:'#ef4444'}]
+};
+
+function e(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function daysUntil(ds){const n=new Date();n.setHours(0,0,0,0);return Math.ceil((new Date(ds)-n)/(864e5));}
+function toggleSB(){sbOpen=!sbOpen;document.getElementById('sb').classList.toggle('col',!sbOpen);}
+function toggleTheme(){S.dk=!S.dk;applyApp();document.getElementById('thico').innerHTML=S.dk?'<circle cx="7" cy="7" r="2.8" fill="currentColor"/><path d="M7 1.5v1M7 11.5v1M1.5 7h1M11.5 7h1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>':'<path d="M11.8 8.8A5.3 5.3 0 016 3.2 5.3 5.3 0 1011 11a3.9 3.9 0 00.8-2.2z" fill="currentColor"/>';}
+function toggleDense(){S.dense=!S.dense;applyApp();document.getElementById('densebtn').classList.toggle('on',S.dense);}
+function applyApp(){document.getElementById('app').className=[S.dk?'dk':'',S.dense?'dense':''].join(' ').trim();}
+function toggleSearch(){srchOpen=!srchOpen;const pill=document.getElementById('srch-pill'),inp=document.getElementById('srch');pill.classList.toggle('open',srchOpen);if(srchOpen){setTimeout(()=>inp.focus(),260);document.getElementById('ptt').style.opacity='0.4';}else{inp.value='';document.getElementById('srch-drop').style.display='none';document.getElementById('ptt').style.opacity='1';}}
+function onBlur(){dropTmr=setTimeout(()=>document.getElementById('srch-drop').style.display='none',200);}
+function onSearch(v){clearTimeout(dropTmr);const drop=document.getElementById('srch-drop');if(!v.trim()){drop.style.display='none';return;}const q=v.toLowerCase(),res=[];S.classes.forEach(c=>{c.docs.forEach(d=>{if(d.name.toLowerCase().includes(q))res.push({type:'Note',label:d.name,sub:c.name,color:c.color,fn:`()=>{toggleSearch();goClass(${c.id});setTimeout(()=>goDoc(${d.id}),200)}`});});c.assignments.forEach(a=>{if(a.title.toLowerCase().includes(q))res.push({type:'Task',label:a.title,sub:c.name,color:c.color,fn:`()=>{toggleSearch();goClass(${c.id})}`});});if(c.name.toLowerCase().includes(q))res.push({type:'Class',label:c.name,sub:`${c.docs.length} docs`,color:c.color,fn:`()=>{toggleSearch();goClass(${c.id})}`});});drop.innerHTML=res.length===0?`<div style="padding:12px 14px;font-size:12px;color:var(--tt)">No results</div>`:res.slice(0,6).map(r=>`<div class="srch-item" onmousedown="${r.fn}"><span class="srch-itag" style="background:${r.color}18;color:${r.color}">${r.type}</span><span style="font-size:12px;font-weight:500">${e(r.label)}</span><div style="font-size:10px;color:var(--tt);margin-top:1px">${e(r.sub)}</div></div>`).join('');drop.style.display='block';}
+function transition(fn){const c=document.getElementById('cnt');c.classList.add('out');setTimeout(()=>{fn();c.classList.remove('out');},130);}
+function gNav(v){transition(()=>{S.view=v;S.selClassId=null;S.selDocId=null;S.selPktId=null;S.classTab='docs';render();});}
+function goClass(id){transition(()=>{S.view='class';S.selClassId=id;S.selDocId=null;S.selPktId=null;S.classTab='docs';flipSt={};render();});}
+function goDoc(id){S.selDocId=id;S.selPktId=null;render();}
+function goPkt(id){S.selPktId=id;S.selDocId=null;render();}
+function bkDoc(){S.selDocId=null;render();}
+function bkPkt(){S.selPktId=null;render();}
+function setTab(t){S.classTab=t;render();}
+function calNav(d){let m=S.calM+d,y=S.calY;if(m<0){m=11;y--;}if(m>11){m=0;y++;}S.calM=m;S.calY=y;render();}
+function togA(id){const cls=S.classes.find(c=>c.id===S.selClassId);const a=cls?.assignments.find(x=>x.id===id);if(a){a.done=!a.done;render();}}
+function flipCard(id){flipSt[id]=!flipSt[id];const el=document.getElementById('fc-'+id);if(el)el.classList.toggle('flip',!!flipSt[id]);}
+function clearFC(){const cls=S.classes.find(c=>c.id===S.selClassId);if(cls){cls.flashcards=[];flipSt={};}render();}
+function selContact(id){S.selContact=id;S.showAttachMenu=false;render();setTimeout(()=>{const el=document.getElementById('thread-msgs');if(el)el.scrollTop=el.scrollHeight;},80);}
+function toggleAttachMenu(){S.showAttachMenu=!S.showAttachMenu;render();}
+function closeAttach(){S.showAttachMenu=false;render();}
+
+function exportPDF(title,content){const w=window.open('','_blank');w.document.write(`<!DOCTYPE html><html><head><title>${title}</title><style>body{font-family:Georgia,serif;max-width:720px;margin:40px auto;color:#1a1a1a;line-height:1.7;font-size:15px}h1{font-size:22px;font-weight:600;margin-bottom:8px;border-bottom:1px solid #e0e0e0;padding-bottom:10px}pre{white-space:pre-wrap;font-family:inherit;font-size:14px}@media print{body{margin:20px}}</style></head><body><h1>${title}</h1><pre>${content}</pre><script>window.onload=()=>window.print()<\/script></body></html>`);w.document.close();}
+
+function renderSB(){
+  document.getElementById('scls').innerHTML=S.classes.map(c=>`<div class="si ${S.view==='class'&&S.selClassId===c.id?'on':''}" onclick="goClass(${c.id})"><div class="sdot" style="background:${c.color}"></div>${e(c.name)}</div>`).join('');
+  ['dashboard','messages','chat','write','summarize','schedule','calendar'].forEach(v=>{const el=document.getElementById('sn-'+v);if(el)el.className='si'+(S.view===v?' on':'');});
+}
+
+function render(){
+  renderSB();
+  const cnt=document.getElementById('cnt'),pt=document.getElementById('ptt');
+  const titles={dashboard:'Dashboard',messages:'Messages',chat:'AI Chat',write:'Writing Lab',summarize:'Summarizer',schedule:'Schedule',calendar:'Calendar'};
+  if(S.view==='messages'){pt.textContent='Messages';cnt.className='cnt msgs-view';cnt.innerHTML=rMessages();setTimeout(()=>{const el=document.getElementById('thread-msgs');if(el)el.scrollTop=el.scrollHeight;},60);}
+  else{cnt.className='cnt';
+    if(S.view==='class'){const c=S.classes.find(x=>x.id===S.selClassId);pt.textContent=c?c.name:'Class';cnt.innerHTML=S.selPktId?rPkt():(S.selDocId?rDoc():rClass());}
+    else{pt.textContent=titles[S.view]||S.view;
+      if(S.view==='dashboard')cnt.innerHTML=rDash();
+      else if(S.view==='chat')cnt.innerHTML=rChat();
+      else if(S.view==='write')cnt.innerHTML=rWrite();
+      else if(S.view==='summarize')cnt.innerHTML=rSum();
+      else if(S.view==='schedule')cnt.innerHTML=rSched();
+      else if(S.view==='calendar')cnt.innerHTML=rCal();
+    }
+  }
+}
+
+function rMessages(){
+  const contacts=S.contacts;
+  const selC=contacts.find(c=>c.id===S.selContact);
+  const thread=S.selContact?(S.threads[S.selContact]||[]):[];
+  const msgVal=S.msgInputs[S.selContact]||'';
+  return`<div style="width:220px;min-width:220px;background:var(--bs);border-right:.5px solid var(--bdt);display:flex;flex-direction:column;overflow:hidden">
+    <div style="padding:12px 12px 10px;border-bottom:.5px solid var(--bdt)">
+      <div style="font-size:12px;font-weight:500;margin-bottom:8px;color:var(--tp)">Messages</div>
+      <div style="display:flex;align-items:center;gap:6px;background:var(--bp);border:.5px solid var(--bdt);border-radius:7px;padding:4px 9px"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="4.5" cy="4.5" r="3.5" stroke="currentColor" stroke-width="1.2"/><path d="M8 8l1.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg><input placeholder="Search..." style="border:none;background:transparent;font-size:11px;outline:none;flex:1;color:var(--tp);padding:0"/></div>
+    </div>
+    <div style="flex:1;overflow-y:auto">
+      ${contacts.map(c=>{const msgs=S.threads[c.id]||[];const last=msgs[msgs.length-1];return`<div onclick="selContact('${c.id}')" style="display:flex;align-items:center;gap:9px;padding:9px 12px;cursor:pointer;transition:background .1s;background:${S.selContact===c.id?'var(--bp)':'transparent'};border-bottom:.5px solid var(--bdt)">
+        <div style="position:relative;flex-shrink:0"><div style="width:32px;height:32px;border-radius:50%;background:${c.color};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:#fff">${c.initials}</div>${c.online?`<div class="onl-dot" style="position:absolute;bottom:0;right:0"></div>`:''}</div>
+        <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500;margin-bottom:1px">${e(c.name)}</div><div style="font-size:10.5px;color:var(--tt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${last?e(last.type==='collab-invite'?'Collaboration invite':last.content.slice(0,28)):'Say hello!'}</div></div>
+        ${c.online?'':`<div style="font-size:9px;color:var(--tt)">${c.lastSeen||''}</div>`}
+      </div>`}).join('')}
+    </div>
+    <div style="padding:10px 12px;border-top:.5px solid var(--bdt)"><button class="btn bta" style="width:100%;justify-content:center;font-size:11px" onclick="omod('new-contact')">+ New conversation</button></div>
+  </div>
+  ${selC?`<div style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0">
+    <div style="padding:10px 14px;border-bottom:.5px solid var(--bdt);display:flex;align-items:center;gap:10px;flex-shrink:0;background:var(--bp)">
+      <div style="width:30px;height:30px;border-radius:50%;background:${selC.color};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;color:#fff;flex-shrink:0">${selC.initials}</div>
+      <div style="flex:1"><div style="font-size:12.5px;font-weight:500">${e(selC.name)}</div><div style="font-size:10px;color:${selC.online?'#10b981':'var(--tt)'};">${selC.online?'Online':'Last seen '+selC.lastSeen}</div></div>
+      <div class="enc-badge"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><rect x="1" y="4" width="7" height="4.5" rx="1" stroke="currentColor" stroke-width="1.1"/><path d="M2.5 4V2.5a2 2 0 014 0V4" stroke="currentColor" stroke-width="1.1"/></svg>End-to-end encrypted</div>
+    </div>
+    <div id="thread-msgs" style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:4px">
+      <div style="text-align:center;margin-bottom:8px"><div style="display:inline-flex;align-items:center;gap:5px;font-size:9.5px;color:var(--tt);background:var(--bs);padding:3px 10px;border-radius:20px;border:.5px solid var(--bdt)"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><rect x="1" y="4" width="7" height="4.5" rx="1" stroke="currentColor" stroke-width="1.1"/><path d="M2.5 4V2.5a2 2 0 014 0V4" stroke="currentColor" stroke-width="1.1"/></svg>Messages are end-to-end encrypted</div></div>
+      ${thread.map(m=>renderMsgItem(m,selC)).join('')}
+    </div>
+    <div style="padding:8px 12px;border-top:.5px solid var(--bdt);background:var(--bp);flex-shrink:0;position:relative">
+      ${S.showAttachMenu?`<div class="attach-menu">
+        <div class="attach-opt" onclick="triggerFileInput('chat-photo','image/*')"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="2" width="10" height="8" rx="1.5" stroke="currentColor" stroke-width="1.1"/><circle cx="4" cy="5" r="1" fill="currentColor"/><path d="M1 8.5l3-3 2 2 1.5-1.5L11 9" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>Send photo</div>
+        <div class="attach-opt" onclick="triggerFileInput('chat-doc','*')"><svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M2 0h6l3 3v8a1 1 0 01-1 1H2a1 1 0 01-1-1V1a1 1 0 011-1zm6 0v3.5H11L8 0z"/></svg>Send document</div>
+        <div class="attach-opt" onclick="closeAttach();omod('collab-invite')"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 6h10M6 1l5 5-5 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Invite to collaborate</div>
+        <input type="file" id="chat-photo" style="display:none" accept="image/*" onchange="handleChatFile(event,'photo')"/>
+        <input type="file" id="chat-doc" style="display:none" onchange="handleChatFile(event,'file')"/>
+      </div>`:''}
+      <div style="display:flex;gap:8px;align-items:flex-end">
+        <button class="icbtn" onclick="toggleAttachMenu()" style="${S.showAttachMenu?'background:var(--ac);color:#fff;border-color:var(--ac)':''}"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v11M1 6.5h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+        <textarea id="msg-in" placeholder="Message ${selC.name}..." style="min-height:38px;max-height:100px;flex:1;font-size:12.5px;resize:none;border-color:transparent;background:var(--bs)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();doSendMsg()}">${e(msgVal)}</textarea>
+        <button class="btn bta btsm" onclick="doSendMsg()" style="flex-shrink:0;align-self:flex-end">Send</button>
+      </div>
+    </div>
+  </div>`:`<div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--tt);font-size:12px">Select a conversation</div>`}`;
+}
+
+function renderMsgItem(m,contact){
+  const isMe=m.role==='me';
+  if(m.type==='collab-invite'){
+    const inv=S.collabInvites[m.inviteId]||{};
+    const cls=S.classes.find(c=>c.id===inv.classId);
+    const asgn=cls?.assignments.find(a=>a.id===inv.asgnId);
+    const wt=asgn?WT[asgn.weight]:null;
+    return`<div style="align-self:${isMe?'flex-end':'flex-start'};max-width:80%">
+      <div class="collab-card">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:7px"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 6h10M6 2l4 4-4 4" stroke="var(--ac)" stroke-width="1.3" stroke-linecap="round"/></svg><div style="font-size:11px;font-weight:500;color:var(--ac)">Collaboration Invite</div></div>
+        ${asgn?`<div style="font-size:12px;font-weight:500;margin-bottom:2px">${e(asgn.title)}</div><div style="display:flex;align-items:center;gap:5px;margin-bottom:8px">${cls?`<div class="sdot" style="background:${cls.color}"></div><span style="font-size:10.5px;color:var(--ts)">${e(cls.name)}</span>`:''} ${wt?`<span class="wt-badge ${wt.cls}">${wt.label}</span>`:''}</div>`:'<div style="font-size:12px;color:var(--ts);margin-bottom:8px">Assignment workspace</div>'}
+        ${inv.status==='accepted'?`<div style="display:flex;gap:6px"><button class="btn btg btsm" onclick="openWorkspace('${m.inviteId}')">Open workspace</button><div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#10b981;align-self:center"><div style="width:6px;height:6px;border-radius:50%;background:#10b981"></div>Active</div></div>`:inv.status==='declined'?`<div style="font-size:10.5px;color:var(--tt)">Declined</div>`:isMe?`<div style="font-size:10.5px;color:var(--tt);margin-bottom:6px">Waiting for response...</div><button class="btn btsm" style="font-size:10px;color:var(--ts)" onclick="simulateAccept('${m.inviteId}')">Simulate acceptance</button>`:`<div style="display:flex;gap:6px"><button class="btn bta btsm" onclick="acceptCollab('${m.inviteId}')">Accept</button><button class="btn btsm" onclick="declineCollab('${m.inviteId}')">Decline</button></div>`}
+      </div>
+      <div style="font-size:9.5px;color:var(--tt);margin-top:3px;text-align:${isMe?'right':'left'}">${m.time}</div>
+    </div>`;
+  }
+  if(m.type==='photo'){return`<div style="align-self:${isMe?'flex-end':'flex-start'}"><div class="chat-bubble ${isMe?'me':'them'}" style="padding:5px"><div style="background:var(--bs);border-radius:6px;padding:10px 14px;text-align:center;font-size:10.5px;color:var(--ts)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="display:block;margin:0 auto 4px"><rect x="1" y="2" width="14" height="11" rx="2" stroke="currentColor" stroke-width="1.3"/><circle cx="5" cy="6" r="1.5" fill="currentColor"/><path d="M1 11l4-4 3 3 2-2 5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>${e(m.fileName)}</div></div><div style="font-size:9.5px;color:var(--tt);margin-top:2px;text-align:${isMe?'right':'left'}">${m.time}</div></div>`;}
+  if(m.type==='file'){return`<div style="align-self:${isMe?'flex-end':'flex-start'}"><div class="chat-bubble ${isMe?'me':'them'}"><div style="display:flex;align-items:center;gap:7px"><svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" style="flex-shrink:0;${isMe?'':'color:var(--ts)'}"><path d="M2 0h6l3 3v8a1 1 0 01-1 1H2a1 1 0 01-1-1V1a1 1 0 011-1zm6 0v3.5H11L8 0z"/></svg><span style="font-size:11.5px">${e(m.fileName)}</span></div></div><div style="font-size:9.5px;color:var(--tt);margin-top:2px;text-align:${isMe?'right':'left'}">${m.time}</div></div>`;}
+  return`<div style="align-self:${isMe?'flex-end':'flex-start'}"><div class="chat-bubble ${isMe?'me':'them'}">${e(m.content)}</div><div style="font-size:9.5px;color:var(--tt);margin-top:2px;text-align:${isMe?'right':'left'}">${m.time}</div></div>`;
+}
+
+function doSendMsg(){
+  const inp=document.getElementById('msg-in'),content=inp?.value?.trim();if(!content||!S.selContact)return;
+  S.showAttachMenu=false;
+  const thread=S.threads[S.selContact]||(S.threads[S.selContact]=[]);
+  thread.push({id:Date.now(),role:'me',type:'text',content,time:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})});
+  S.msgInputs[S.selContact]='';render();
+  setTimeout(()=>{const el=document.getElementById('thread-msgs');if(el)el.scrollTop=el.scrollHeight;},60);
+}
+
+function triggerFileInput(id){closeAttach();setTimeout(()=>document.getElementById(id)?.click(),100);}
+function handleChatFile(ev,type){
+  const file=ev.target.files?.[0];if(!file||!S.selContact)return;
+  const thread=S.threads[S.selContact]||(S.threads[S.selContact]=[]);
+  thread.push({id:Date.now(),role:'me',type,fileName:file.name,time:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})});
+  render();setTimeout(()=>{const el=document.getElementById('thread-msgs');if(el)el.scrollTop=el.scrollHeight;},60);
+}
+
+function sendCollabInvite(classId,asgnId){
+  if(!S.selContact)return;
+  const invId='inv_'+Date.now();
+  S.collabInvites[invId]={classId,asgnId,status:'pending'};
+  S.collabWorkspace[invId]={mySection:'',theirSection:'AI is preparing a collaborative workspace for this assignment...\n\nBoth of you can work on your own sections and save them to the shared document.'};
+  const thread=S.threads[S.selContact]||(S.threads[S.selContact]=[]);
+  thread.push({id:Date.now(),role:'me',type:'collab-invite',inviteId:invId,time:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})});
+  cmod();render();setTimeout(()=>{const el=document.getElementById('thread-msgs');if(el)el.scrollTop=el.scrollHeight;},80);
+}
+
+function simulateAccept(invId){S.collabInvites[invId].status='accepted';render();}
+function acceptCollab(invId){S.collabInvites[invId].status='accepted';render();}
+function declineCollab(invId){S.collabInvites[invId].status='declined';render();}
+
+function openWorkspace(invId){
+  S.activeWorkspaceId=invId;
+  const inv=S.collabInvites[invId]||{};
+  const cls=S.classes.find(c=>c.id===inv.classId);
+  const asgn=cls?.assignments.find(a=>a.id===inv.asgnId);
+  const contact=S.contacts.find(c=>c.id===S.selContact);
+  const ws=S.collabWorkspace[invId]||{};
+  const inn=document.getElementById('min');
+  document.getElementById('mcon').style.display='flex';
+  inn.innerHTML=`<div class="mtt">Shared Workspace — ${asgn?e(asgn.title):'Assignment'}</div>
+  <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px">
+    ${cls?`<div class="sdot" style="background:${cls.color}"></div><span style="font-size:11px;color:var(--ts)">${e(cls.name)}</span>`:''}
+    <div class="enc-badge" style="margin-left:auto"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><rect x="1" y="4" width="7" height="4.5" rx="1" stroke="currentColor" stroke-width="1.1"/><path d="M2.5 4V2.5a2 2 0 014 0V4" stroke="currentColor" stroke-width="1.1"/></svg>End-to-end encrypted</div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:11px">
+    <div>
+      <div style="font-size:10px;font-weight:500;color:var(--ts);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">Your section</div>
+      <textarea id="ws-my" placeholder="Write your notes, answers, or contribution here..." style="min-height:160px;font-size:12px">${e(ws.mySection||'')}</textarea>
+    </div>
+    <div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px"><div style="width:16px;height:16px;border-radius:50%;background:${contact?.color||'#888'};display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:500;color:#fff">${contact?.initials||'?'}</div><div style="font-size:10px;font-weight:500;color:var(--ts);text-transform:uppercase;letter-spacing:.06em">${contact?e(contact.name)+"'s section":'Their section'}</div><div class="onl-dot" style="margin-left:auto"></div></div>
+      <div style="min-height:160px;background:var(--bs);border:.5px solid var(--bdt);border-radius:8px;padding:8px 10px;font-size:12px;line-height:1.6;color:var(--ts);white-space:pre-wrap">${e(ws.theirSection||'Waiting for their contribution...')}</div>
+    </div>
+  </div>
+  <div class="mac">
+    <button class="btn" onclick="cmod()">Close</button>
+    <button class="btn" onclick="exportWorkspacePDF('${invId}')"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 1v6M2.5 5l2.5 2.5L7.5 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M1 9h8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> Export PDF</button>
+    <button class="btn bta" onclick="saveWorkspace('${invId}')">Save to class</button>
+  </div>`;
+}
+
+function saveWorkspace(invId){
+  const mySection=document.getElementById('ws-my')?.value||'';
+  S.collabWorkspace[invId].mySection=mySection;
+  const inv=S.collabInvites[invId]||{};
+  const cls=S.classes.find(c=>c.id===inv.classId);
+  const asgn=cls?.assignments.find(a=>a.id===inv.asgnId);
+  if(cls&&asgn){
+    const contact=S.contacts.find(c=>c.id===S.selContact);
+    const docName=`Collab: ${asgn.title}`;
+    const combined=`SHARED WORKSPACE\nWith: ${contact?.name||'Collaborator'}\n\n--- MY SECTION ---\n${mySection}\n\n--- ${contact?.name?.toUpperCase()||'THEIR'} SECTION ---\n${S.collabWorkspace[invId].theirSection||''}`;
+    const existing=cls.docs.find(d=>d.name===docName);
+    if(existing){existing.content=combined;}
+    else{cls.docs.push({id:Date.now(),name:docName,content:combined,qa:[]});}
+  }
+  cmod();
+  const notice=document.createElement('div');notice.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#10b981;color:#fff;padding:8px 16px;border-radius:8px;font-size:12px;z-index:999;font-family:system-ui';notice.textContent='Saved to class!';document.body.appendChild(notice);setTimeout(()=>notice.remove(),2000);
+}
+
+function exportWorkspacePDF(invId){
+  const ws=S.collabWorkspace[invId]||{};const inv=S.collabInvites[invId]||{};
+  const cls=S.classes.find(c=>c.id===inv.classId);const asgn=cls?.assignments.find(a=>a.id===inv.asgnId);
+  const content=`My Section:\n${ws.mySection||''}\n\nCollaborator Section:\n${ws.theirSection||''}`;
+  exportPDF(asgn?asgn.title+' — Shared Workspace':'Shared Workspace',content);
+}
+
+function rDash(){
+  const tots=S.classes.reduce((s,c)=>s+c.docs.length,0);
+  const allA=S.classes.flatMap(c=>c.assignments.filter(a=>!a.done).map(a=>({...a,cls:c}))).sort((a,b)=>a.dueDate.localeCompare(b.dueDate));
+  const tod=new Date().getDay();
+  const todSch=S.classes.flatMap(c=>c.schedule.filter(s=>s.day===tod).map(s=>({...s,cls:c}))).sort((a,b)=>a.start.localeCompare(b.start));
+  const exams=S.examDates.map(x=>({...x,days:daysUntil(x.date)})).sort((a,b)=>a.days-b.days);
+  return`${exams.length?`<div class="cdown-grid">${exams.map(x=>`<div class="cdown-card ${x.days<=14?'urgent':''}"><div style="font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:${x.color};margin-bottom:4px">Countdown</div><div class="cdown-n" style="color:${x.days<=7?'#ef4444':x.days<=14?'#f59e0b':x.color}">${x.days<0?'Past':x.days}</div><div style="font-size:10px;color:var(--ts);margin-top:1px">${x.days<0?'days ago':'days away'}</div><div class="cdown-name" style="color:var(--ts)">${e(x.name)}</div><div onclick="delExam(${x.id})" style="position:absolute;top:8px;right:10px;cursor:pointer;color:var(--tt);font-size:12px">×</div></div>`).join('')}<div class="cdown-card" style="display:flex;align-items:center;justify-content:center;cursor:pointer;border-style:dashed" onclick="omod('add-exam')"><div style="font-size:11px;color:var(--tt);text-align:center"><div style="font-size:18px;margin-bottom:3px">+</div>Add countdown</div></div></div>`:''}
+  <div class="sgrid"><div class="scd"><div class="snum" style="color:var(--ac)">${S.classes.length}</div><div class="slab">Classes</div></div><div class="scd"><div class="snum" style="color:#10b981">${tots}</div><div class="slab">Documents</div></div><div class="scd"><div class="snum" style="color:#6366f1">${allA.length}</div><div class="slab">Pending tasks</div></div></div>
+  <div class="two"><div><div class="cd"><div class="clbl">Upcoming assignments</div>
+    ${allA.length===0?'<div class="emp">All caught up!</div>':allA.slice(0,4).map(a=>`<div class="ri"><div class="sdot" style="background:${a.cls.color}"></div><div style="flex:1"><div style="font-size:11.5px;font-weight:500">${e(a.title)}</div><div style="font-size:10px;color:var(--ts)">${e(a.cls.name)}</div></div><span class="wt-badge ${WT[a.weight||'prepare'].cls}">${WT[a.weight||'prepare'].label}</span><div style="font-size:10px;color:${daysUntil(a.dueDate)<=3?'#ef4444':daysUntil(a.dueDate)<=7?'#f59e0b':'var(--tt)'};font-weight:500;margin-left:7px">${a.dueDate}</div></div>`).join('')}
+  </div>
+  <div class="cd"><div class="clbl">Today's classes</div>
+    ${todSch.length===0?'<div class="emp" style="padding:8px 0">No classes today</div>':todSch.map(s=>`<div class="ri"><div style="width:3px;height:26px;border-radius:2px;background:${s.cls.color};flex-shrink:0"></div><div style="flex:1"><div style="font-size:11.5px;font-weight:500">${e(s.cls.name)}</div><div style="font-size:10px;color:var(--ts)">${s.start}–${s.end}${s.room?' · '+e(s.room):''}</div></div></div>`).join('')}
+  </div></div>
+  <div class="cd"><div class="clbl">Classes</div>${S.classes.map(c=>`<div class="ri" onclick="goClass(${c.id})"><div style="width:24px;height:24px;border-radius:6px;background:${c.color}22;display:flex;align-items:center;justify-content:center;flex-shrink:0"><div class="sdot" style="background:${c.color}"></div></div><div style="flex:1"><div style="font-size:11.5px;font-weight:500">${e(c.name)}</div><div style="font-size:10px;color:var(--ts)">${c.docs.length} docs · ${c.assignments.filter(a=>!a.done).length} tasks</div></div><div style="color:var(--tt);font-size:13px">›</div></div>`).join('')}</div></div>`;
+}
+
+function rClass(){
+  const cls=S.classes.find(c=>c.id===S.selClassId);if(!cls)return'';const t=S.classTab;
+  return`<div class="clsh"><div class="clsb" style="background:${cls.color}"></div><div style="flex:1"><div style="font-size:13px;font-weight:500">${e(cls.name)}</div><div style="font-size:10px;color:var(--ts)">${cls.docs.length} docs · ${cls.packets.length} packets · ${cls.flashcards.length} cards · ${cls.assignments.filter(a=>!a.done).length} pending</div></div></div>
+  <div class="tabs"><div class="tab ${t==='docs'?'on':''}" onclick="setTab('docs')">Notes</div><div class="tab ${t==='packets'?'on':''}" onclick="setTab('packets')">Packets</div><div class="tab ${t==='flashcards'?'on':''}" onclick="setTab('flashcards')">Flashcards</div><div class="tab ${t==='assignments'?'on':''}" onclick="setTab('assignments')">Assignments</div></div>
+  ${t==='docs'?`<div class="sh2"><span style="font-size:12px;font-weight:500">Notes & Documents</span><button class="btn bta btsm" onclick="omod('add-doc')">+ Add note</button></div>
+    ${cls.docs.length===0?'<div class="emp">No notes yet.</div>':cls.docs.map(d=>`<div class="di" onclick="goDoc(${d.id})"><svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" style="color:var(--tt);flex-shrink:0"><path d="M2 0h5.2l3.3 3.3V11a1 1 0 01-1 1H2a1 1 0 01-1-1V1a1 1 0 011-1zm5 0v3.5h3.5L7 0z"/></svg><div style="flex:1;min-width:0"><div style="font-size:11.5px;font-weight:500">${e(d.name)}</div><div style="font-size:10px;color:var(--ts)">${d.qa.length} Q&amp;A</div></div><div style="color:var(--tt);font-size:13px">›</div></div>`).join('')}`:''}
+  ${t==='packets'?`<div class="sh2"><span style="font-size:12px;font-weight:500">Study Packets</span><button class="btn bta btsm" onclick="omod('add-packet')">+ New</button></div>
+    ${cls.packets.length===0?'<div class="emp">No packets yet.</div>':cls.packets.map(p=>`<div class="di" onclick="goPkt(${p.id})"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" style="color:var(--ac);flex-shrink:0"><rect x=".5" y=".5" width="11" height="11" rx="1.5"/><path d="M3 4h6M3 6.5h6M3 9h4" stroke-linecap="round"/></svg><div style="flex:1;min-width:0"><div style="font-size:11.5px;font-weight:500">${e(p.name)}</div><div style="display:flex;gap:4px;margin-top:2px"><span class="tag tag-pkt">Packet</span>${p.textbook?'<span class="tag tag-txt">Textbook</span>':''}</div></div><div style="color:var(--tt);font-size:13px">›</div></div>`).join('')}`:''}
+  ${t==='flashcards'?rFCTab(cls):''}
+  ${t==='assignments'?rAssignments(cls):''}`;
+}
+
+function rAssignments(cls){
+  const groups={perform:[],rehearse:[],prepare:[]};
+  cls.assignments.forEach(a=>{const w=a.weight||'prepare';(groups[w]||groups.prepare).push(a);});
+  return`<div class="sh2"><span style="font-size:12px;font-weight:500">Assignments</span><button class="btn bta btsm" onclick="omod('add-asgn')">+ Add</button></div>
+  ${cls.assignments.length===0?'<div class="emp">No assignments yet!</div>':['perform','rehearse','prepare'].map(wk=>{const items=groups[wk];if(!items.length)return'';const w=WT[wk];return`<div class="wt-group"><div class="wt-hdr"><span class="wt-badge ${w.cls}">${w.label}</span><div class="wt-hdr-name" style="color:${w.col}">${wk==='perform'?'Major grades — highest weight':wk==='rehearse'?'Practice grades — medium weight':'Completion grades — lowest weight'}</div></div>${items.sort((a,b)=>a.dueDate.localeCompare(b.dueDate)).map(a=>`<div class="ait"><div class="chk ${a.done?'ck':''}" onclick="togA(${a.id})">${a.done?'<svg width="9" height="7" viewBox="0 0 9 7" fill="none"><path d="M1 3.5l2.5 2.5 4.5-4.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>':''}</div><div style="flex:1"><div style="font-size:11.5px;font-weight:500${a.done?';text-decoration:line-through;color:var(--tt)':''}">${e(a.title)}</div></div><div style="display:flex;align-items:center;gap:6px"><button class="btn btsm" style="font-size:10px;padding:2px 6px;color:var(--ts);border-color:var(--bdt)" onclick="msgCollab(${cls.id},${a.id})"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M1 4.5h7M4.5 1l3.5 3.5-3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> Collab</button><div style="font-size:10px;color:${daysUntil(a.dueDate)<=3?'#ef4444':daysUntil(a.dueDate)<=7?'#f59e0b':'var(--tt)'};font-weight:500">${a.dueDate}</div></div></div>`).join('')}</div>`;}).join('')}`;
+}
+
+function msgCollab(classId,asgnId){S.view='messages';S.selClassId=null;render();setTimeout(()=>omod('collab-invite',classId,asgnId),200);}
+
+function rFCTab(cls){
+  const has=cls.docs.length>0||cls.packets.length>0;
+  const opts=[...cls.docs.map(d=>`<option value="doc-${d.id}">${e(d.name)}</option>`),...cls.packets.map(p=>`<option value="pkt-${p.id}">${e(p.name)}</option>`)].join('');
+  return`<div class="sh2"><span style="font-size:12px;font-weight:500">Flashcards <span style="font-weight:400;color:var(--ts)">(${cls.flashcards.length})</span></span>${cls.flashcards.length>0?`<button class="btn btsm" style="color:var(--tt);border-color:var(--bdt)" onclick="clearFC()">Clear</button>`:''}</div>
+  <div class="cd" style="margin-bottom:11px"><div class="clbl">Generate with AI</div>${!has?'<div style="font-size:12px;color:var(--ts)">Add notes or a packet first.</div>':`<div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap"><select id="fc-src" style="flex:1;min-width:130px">${opts}</select><button class="btn bta" onclick="doFlash()" ${S.fcLoading?'disabled':''}>${S.fcLoading?'<div class="ld"><span></span><span></span><span></span></div> Generating...':'Generate cards'}</button></div>`}</div>
+  ${cls.flashcards.length===0?'<div class="emp">No flashcards yet!</div>':`<div style="font-size:10px;color:var(--ts);margin-bottom:8px">Click a card to flip</div><div class="fc-grid">${cls.flashcards.map(c=>`<div class="fc" id="fc-${c.id}" onclick="flipCard(${c.id})"><div class="fc-in"><div class="fc-f"><div class="fc-lbl">Question</div><div class="fc-q">${e(c.q)}</div></div><div class="fc-b"><div class="fc-lbl" style="color:#10b981">Answer</div><div class="fc-a">${e(c.a)}</div></div></div></div>`).join('')}</div>`}`;
+}
+
+function rDoc(){
+  const cls=S.classes.find(c=>c.id===S.selClassId),doc=cls?.docs.find(d=>d.id===S.selDocId);if(!doc)return'';
+  return`<div class="bk" onclick="bkDoc()">← Back to ${e(cls.name)}</div>
+  <div style="font-size:13px;font-weight:500;margin-bottom:4px">${e(doc.name)}</div>
+  <div style="margin-bottom:11px"><button class="pdf-btn" onclick="exportPDF('${doc.name.replace(/'/g,"\\'")}','${doc.content.replace(/\n/g,'\\n').replace(/'/g,"\\'")}')"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 1v6M2.5 5l2.5 2.5L7.5 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M1 9h8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> Export PDF</button></div>
+  <div class="cd"><div class="clbl">Content</div><div style="font-size:11.5px;line-height:1.7;color:var(--ts);white-space:pre-wrap;max-height:130px;overflow-y:auto">${e(doc.content)}</div></div>
+  <div class="cd"><div class="clbl">Ask AI about this document</div>
+    <div style="display:flex;gap:7px;margin-bottom:10px"><input id="qai" placeholder="Ask a question..." onkeydown="if(event.key==='Enter')doQA()" style="flex:1"/><button class="btn bta" onclick="doQA()" ${S.qaLoading?'disabled':''}>${S.qaLoading?'<div class="ld"><span></span><span></span><span></span></div>':'Ask AI'}</button></div>
+    ${doc.qa.length===0&&!S.qaLoading?'<div class="emp" style="padding:8px 0">Ask anything about your notes</div>':''}
+    ${[...doc.qa].reverse().map(p=>`<div class="qap"><div class="qqq">Q: ${e(p.q)}</div><div class="qqa">${e(p.a)}</div></div>`).join('')}
+  </div>`;
+}
+
+function rPkt(){
+  const cls=S.classes.find(c=>c.id===S.selClassId),pkt=cls?.packets.find(p=>p.id===S.selPktId);if(!pkt)return'';
+  return`<div class="bk" onclick="bkPkt()">← Back to ${e(cls.name)}</div>
+  <div style="font-size:13px;font-weight:500;margin-bottom:10px">${e(pkt.name)}</div>
+  <div class="pkt-wrap">
+    <div class="pkt-panel"><div class="pkt-ph"><span>Question Packet</span><button class="btn btsm" onclick="omod('edit-pkt-q')">Edit</button></div><div class="pkt-content">${e(pkt.questions)}</div></div>
+    <div class="pkt-panel"><div class="pkt-ph"><span>Reference Textbook</span><button class="btn btsm" onclick="omod('edit-pkt-ref')">Edit</button></div><div class="pkt-content" style="${!pkt.textbook?'display:flex;align-items:center;justify-content:center;color:var(--tt);text-align:center;font-size:11px':''}">${pkt.textbook?e(pkt.textbook):'No textbook added.'}</div></div>
+  </div>
+  <div class="cd"><div class="clbl">AI Packet Assistant</div>
+    <div style="font-size:10px;color:var(--ts);margin-bottom:8px">Try: <em style="color:var(--ac)">"Go to topic 7.3 and answer question 3"</em></div>
+    <div id="pkt-msgs" style="max-height:200px;overflow-y:auto;margin-bottom:8px">
+      ${pkt.messages.length===0?'<div class="emp" style="padding:10px 0">Ask AI to answer your packet questions</div>':pkt.messages.map(m=>`<div style="padding:7px 10px;border-radius:8px;margin-bottom:5px;font-size:11.5px;line-height:1.6;${m.role==='user'?'background:var(--ac);color:#fff;margin-left:20px':'background:var(--bs);border:.5px solid var(--bdt);white-space:pre-wrap;margin-right:20px'}">${e(m.content)}</div>`).join('')}
+      ${S.pktLoading?'<div style="padding:7px 10px;background:var(--bs);border:.5px solid var(--bdt);border-radius:8px;margin-bottom:5px"><div class="ld"><span></span><span></span><span></span></div></div>':''}
+    </div>
+    <div style="display:flex;gap:7px;align-items:flex-end"><textarea id="pkt-in" placeholder="Ask AI about your packet..." style="min-height:44px;max-height:90px;flex:1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();doPkt()}"></textarea><button class="btn bta" onclick="doPkt()" ${S.pktLoading?'disabled':''} style="flex-shrink:0">${S.pktLoading?'<div class="ld"><span></span><span></span><span></span></div>':'Send'}</button></div>
+  </div>`;
+}
+
+function rChat(){
+  const sug=['Explain the causes of WWI','Help me understand derivatives','Difference between mitosis and meiosis','Study tips for finals'];
+  return`<div style="max-width:660px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px"><div style="font-size:11px;color:var(--ts)">Ask anything — no document needed</div>${S.chatMsgs.length>0?`<button class="pdf-btn" onclick="S.chatMsgs=[];render()">Clear</button>`:''}</div>
+  ${S.chatMsgs.length===0?`<div class="cd"><div style="font-size:11.5px;font-weight:500;margin-bottom:8px;color:var(--ts)">Try asking:</div><div style="display:flex;flex-wrap:wrap">${sug.map(s=>`<span class="fb-chip" onclick="document.getElementById('chat-in').value='${s.replace(/'/g,"\\'")}'">${s}</span>`).join('')}</div></div>`:''}
+  <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:11px">${S.chatMsgs.map(m=>`<div class="chat-bubble ${m.role}">${e(m.content)}</div>`).join('')}${S.chatLoading?`<div class="chat-bubble them"><div class="ld"><span></span><span></span><span></span></div></div>`:''}</div>
+  <div class="cd" style="padding:9px 11px"><div style="display:flex;gap:7px;align-items:flex-end"><textarea id="chat-in" placeholder="Ask anything..." style="min-height:44px;max-height:110px;flex:1;border:none;background:transparent;padding:3px 0;font-size:12.5px;resize:none" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();doChat()}"></textarea><button class="btn bta" onclick="doChat()" ${S.chatLoading?'disabled':''} style="flex-shrink:0;align-self:flex-end">${S.chatLoading?'<div class="ld"><span></span><span></span><span></span></div>':'Send'}</button></div></div></div>`;
+}
+
+function rWrite(){
+  const MODES=[{id:'essay',label:'Essay'},{id:'email',label:'Email'},{id:'cover',label:'Cover letter'},{id:'creative',label:'Creative'},{id:'any',label:'Anything'}];
+  const out=S.writeOut;
+  return`<div style="max-width:660px"><div class="cd"><div class="clbl">What are you writing?</div><div style="display:flex;flex-wrap:wrap;gap:0;margin-bottom:11px">${MODES.map(m=>`<span class="fb-chip ${S.writeTone===m.id?'on':''}" onclick="S.writeTone='${m.id}';render()">${m.label}</span>`).join('')}</div><div class="flbl" style="margin-bottom:4px">Paste your draft</div><textarea id="write-in" placeholder="Paste your writing here for AI feedback..." style="min-height:130px">${e(S.writeInput)}</textarea><div style="display:flex;gap:8px;margin-top:8px"><button class="btn bta" onclick="doWrite()" ${S.writeLoading?'disabled':''}>${S.writeLoading?'<div class="ld"><span></span><span></span><span></span></div> Analyzing...':'Get AI feedback'}</button>${out?`<button class="pdf-btn" onclick="exportPDF('Writing Feedback',S.writeOut.sections.map(s=>s.label.toUpperCase()+'\\n\\n'+s.body).join('\\n\\n---\\n\\n'))">Export PDF</button>`:''}</div></div>
+  ${out?`<div class="cd">${out.sections.map(s=>`<div class="section-out"><div class="section-lbl">${e(s.label)}</div><div class="section-body">${e(s.body)}</div></div>`).join('')}</div>`:''}</div>`;
+}
+
+function rSum(){
+  return`<div style="max-width:660px"><div class="cd"><div class="clbl">Summarize any text</div><div style="font-size:11px;color:var(--ts);margin-bottom:9px">Articles, chapters, transcripts, lecture notes, research papers — anything.</div><textarea id="sum-in" placeholder="Paste any text here..." style="min-height:130px">${e(S.sumInput)}</textarea><div style="display:flex;gap:8px;margin-top:8px"><button class="btn bta" onclick="doSum()" ${S.sumLoading?'disabled':''}>${S.sumLoading?'<div class="ld"><span></span><span></span><span></span></div> Summarizing...':'Summarize'}</button>${S.sumOut?`<button class="pdf-btn" onclick="exportPDF('Summary',S.sumOut)">Export PDF</button>`:''}</div></div>
+  ${S.sumOut?`<div class="cd"><div style="font-size:12px;line-height:1.7;white-space:pre-wrap">${e(S.sumOut)}</div></div>`:''}</div>`;
+}
+
+function rSched(){
+  const GH=380,TS=7,TE=21,TD=TE-TS;const WDAYS=['Monday','Tuesday','Wednesday','Thursday','Friday'];
+  const tL=Array.from({length:TD+1},(_,i)=>`<div style="position:absolute;top:${i/TD*GH}px;font-size:8px;color:var(--tt);right:4px;transform:translateY(-50%);white-space:nowrap">${TS+i}:00</div>`).join('');
+  const gL=Array.from({length:TD-1},(_,i)=>`<div style="position:absolute;top:${(i+1)/TD*GH}px;left:0;right:0;border-top:.5px solid var(--bdt)"></div>`).join('');
+  function slots(dn){return S.classes.flatMap(c=>c.schedule.filter(s=>s.day===dn).map(s=>({...s,cls:c}))).map(s=>{const sm=(parseInt(s.start)*60+parseInt(s.start.split(':')[1]))-(TS*60),em=(parseInt(s.end)*60+parseInt(s.end.split(':')[1]))-(TS*60);const top=sm/(TD*60)*GH,h=Math.max((em-sm)/(TD*60)*GH,20);return`<div style="position:absolute;top:${top}px;left:2px;right:2px;height:${h}px;background:${s.cls.color}25;border-left:3px solid ${s.cls.color};border-radius:0 4px 4px 0;padding:3px 5px;overflow:hidden"><div style="font-size:8.5px;font-weight:600;color:${s.cls.color};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e(s.cls.name)}</div><div style="font-size:7.5px;color:var(--ts)">${s.start}–${s.end}</div><div onclick="delSlot(${s.id})" style="position:absolute;top:2px;right:3px;color:var(--tt);cursor:pointer;font-size:11px">×</div></div>`;}).join('');}
+  return`<div class="sh2"><span style="font-size:12px;font-weight:500">Weekly Timetable</span><button class="btn bta btsm" onclick="omod('add-slot')">+ Add time</button></div>
+  <div style="display:grid;grid-template-columns:38px repeat(5,minmax(0,1fr));gap:3px"><div></div>${WDAYS.map(d=>`<div style="font-size:8.5px;text-align:center;color:var(--tt);padding:4px 0;text-transform:uppercase;font-weight:500;background:var(--bs);border-radius:5px;margin-bottom:2px">${d}</div>`).join('')}<div style="position:relative;height:${GH}px">${tL}</div>${[1,2,3,4,5].map(dn=>`<div style="position:relative;height:${GH}px;background:var(--bs);border-radius:7px;border:.5px solid var(--bdt)">${gL}${slots(dn)}</div>`).join('')}</div>`;
+}
+
+function rCal(){
+  const{calY:yr,calM:mo}=S,dim=new Date(yr,mo+1,0).getDate(),fd=new Date(yr,mo,1).getDay();
+  const td=new Date(),tds=`${td.getFullYear()}-${String(td.getMonth()+1).padStart(2,'0')}-${String(td.getDate()).padStart(2,'0')}`;
+  const allA=S.classes.flatMap(c=>c.assignments.map(a=>({...a,cls:c})));
+  const cells=Array.from({length:fd},()=>'<div class="calc em"></div>').join('')+Array.from({length:dim},(_,i)=>{const d=i+1,ds=`${yr}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,isT=ds===tds;const da=allA.filter(a=>a.dueDate===ds),se=S.schoolEvents.filter(x=>x.date===ds);return`<div class="calc ${isT?'tod':''}"><div class="caldn ${isT?'tn':''}">${d}</div>${se.slice(0,1).map(x=>`<div class="calev" style="background:${x.color}22;color:${x.color}">${e(x.title)}</div>`).join('')}${da.slice(0,2).map(a=>`<div class="calev" style="background:${a.cls.color};color:#fff">${e(a.title)}</div>`).join('')}</div>`;}).join('');
+  const up=allA.filter(a=>!a.done&&a.dueDate>=tds).sort((a,b)=>a.dueDate.localeCompare(b.dueDate)).slice(0,8);
+  return`<div class="calw"><div><div class="calh"><div class="calm">${MONTHS[mo]} ${yr}</div><div style="display:flex;gap:4px"><button class="calnb" onclick="calNav(-1)">‹</button><button class="calnb" onclick="calNav(1)">›</button></div></div><div class="calg">${DSHT.map(d=>`<div class="caldl">${d}</div>`).join('')}${cells}</div></div>
+  <div><div class="cd"><div class="clbl">Upcoming tasks</div>${up.map(a=>`<div style="padding:5px 0;border-bottom:.5px solid var(--bdt)"><div style="font-size:11px;font-weight:500">${e(a.title)}</div><div style="display:flex;align-items:center;gap:5px;margin-top:1px"><div style="font-size:9.5px;font-weight:500;color:${a.cls.color}">${e(a.cls.name)}</div><span class="wt-badge ${WT[a.weight||'prepare'].cls}">${WT[a.weight||'prepare'].label}</span></div><div style="font-size:9.5px;color:var(--tt)">Due ${a.dueDate}</div></div>`).join('')}</div>
+  <div class="cd"><div class="sh2"><span class="clbl" style="margin:0">School events</span><button class="btn btsm" onclick="omod('add-event')" style="font-size:10px;padding:2px 6px">+ Add</button></div>${S.schoolEvents.sort((a,b)=>a.date.localeCompare(b.date)).map(x=>`<div style="display:flex;align-items:center;gap:7px;padding:5px 9px;background:var(--bp);border:.5px solid var(--bdt);border-radius:7px;margin-bottom:4px"><div class="sdot" style="background:${x.color}"></div><div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:500">${e(x.title)}</div><div style="font-size:9.5px;color:var(--ts)">${x.date}</div></div><div onclick="delEv(${x.id})" style="cursor:pointer;color:var(--tt);font-size:12px">×</div></div>`).join('')}</div></div></div>`;
+}
+
+function swatches(si=0){selCol=ACOLS[si];return`<div class="csws">${ACOLS.map((c,i)=>`<div style="background:${c}" class="${i===si?'sel':''}" onclick="pickCol('${c}',this)"></div>`).join('')}</div>`;}
+function pickCol(c,el){selCol=c;el.closest('.csws').querySelectorAll('div').forEach(d=>d.classList.remove('sel'));el.classList.add('sel');}
+function cmod(ev){if(!ev||ev.target===document.getElementById('mcon'))document.getElementById('mcon').style.display='none';}
+function delSlot(id){S.classes.forEach(c=>{c.schedule=c.schedule.filter(s=>s.id!==id);});render();}
+function delEv(id){S.schoolEvents=S.schoolEvents.filter(x=>x.id!==id);render();}
+function delExam(id){S.examDates=S.examDates.filter(x=>x.id!==id);render();}
+
+function omod(type,extraClassId,extraAsgnId){
+  const con=document.getElementById('mcon'),inn=document.getElementById('min');con.style.display='flex';
+  const cls=S.classes.find(c=>c.id===S.selClassId),pkt=cls?.packets.find(p=>p.id===S.selPktId);
+  if(type==='add-class'){inn.innerHTML=`<div class="mtt">Add new class</div><div class="fg"><div class="flbl">Name</div><input id="m-n" placeholder="e.g. AP Biology"/></div><div class="fg"><div class="flbl">Color</div>${swatches()}</div><div class="mac"><button class="btn" onclick="cmod()">Cancel</button><button class="btn bta" onclick="doAddClass()">Add</button></div>`;setTimeout(()=>document.getElementById('m-n')?.focus(),50);}
+  else if(type==='add-doc'){inn.innerHTML=`<div class="mtt">Add note / document</div><div class="fg"><div class="flbl">Name</div><input id="m-dn" placeholder="e.g. Chapter 5 Notes"/></div><div class="fg"><div class="flbl" style="margin-bottom:4px">Upload file</div><div class="fuz" onclick="document.getElementById('mfin').click()"><input type="file" id="mfin" accept=".pdf,.docx,.txt" onchange="hdlFile(event,'m-dc','m-dn','fuztxt')" style="display:none"/><div id="fuztxt">Click to upload PDF, DOCX, or TXT</div></div><div style="text-align:center;font-size:10px;color:var(--tt);margin:4px 0">— or paste —</div><textarea id="m-dc" placeholder="Paste content here..." style="min-height:80px"></textarea></div><div class="mac"><button class="btn" onclick="cmod()">Cancel</button><button class="btn bta" onclick="doAddDoc()">Add</button></div>`;setTimeout(()=>document.getElementById('m-dn')?.focus(),50);}
+  else if(type==='add-packet'){inn.innerHTML=`<div class="mtt">New study packet</div><div class="fg"><div class="flbl">Packet name</div><input id="m-pn" placeholder="e.g. Unit 7 Packet"/></div><div class="fg"><div class="flbl" style="margin-bottom:4px">Question packet</div><div class="fuz" onclick="document.getElementById('mpqf').click()"><input type="file" id="mpqf" accept=".pdf,.docx,.txt" onchange="hdlFile(event,'m-pq','m-pn','fuztxt-q')" style="display:none"/><div id="fuztxt-q">Upload packet</div></div><div style="text-align:center;font-size:10px;color:var(--tt);margin:3px 0">— or paste —</div><textarea id="m-pq" placeholder="Paste questions..." style="min-height:65px"></textarea></div><div class="fg"><div class="flbl" style="margin-bottom:4px">Textbook (optional)</div><div class="fuz" onclick="document.getElementById('mptf').click()"><input type="file" id="mptf" accept=".pdf,.docx,.txt" onchange="hdlFile(event,'m-pt',null,'fuztxt-t')" style="display:none"/><div id="fuztxt-t">Upload chapter</div></div><div style="text-align:center;font-size:10px;color:var(--tt);margin:3px 0">— or paste —</div><textarea id="m-pt" placeholder="Paste textbook content..." style="min-height:65px"></textarea></div><div class="mac"><button class="btn" onclick="cmod()">Cancel</button><button class="btn bta" onclick="doAddPkt()">Create</button></div>`;setTimeout(()=>document.getElementById('m-pn')?.focus(),50);}
+  else if(type==='edit-pkt-q'&&pkt){inn.innerHTML=`<div class="mtt">Edit question packet</div><div class="fg"><textarea id="m-epq" style="min-height:190px">${e(pkt.questions)}</textarea></div><div class="mac"><button class="btn" onclick="cmod()">Cancel</button><button class="btn bta" onclick="doEditPktQ()">Save</button></div>`;}
+  else if(type==='edit-pkt-ref'){const p=cls?.packets.find(p=>p.id===S.selPktId);inn.innerHTML=`<div class="mtt">Edit textbook</div><div class="fg"><div class="fuz" onclick="document.getElementById('eprf').click()"><input type="file" id="eprf" accept=".pdf,.docx,.txt" onchange="hdlFile(event,'m-epr',null,'eprtxt')" style="display:none"/><div id="eprtxt">Upload file</div></div></div><div class="fg"><textarea id="m-epr" placeholder="Paste textbook content..." style="min-height:140px">${e(p?.textbook||'')}</textarea></div><div class="mac"><button class="btn" onclick="cmod()">Cancel</button><button class="btn bta" onclick="doEditPktRef()">Save</button></div>`;}
+  else if(type==='add-asgn'){inn.innerHTML=`<div class="mtt">Add assignment${cls?' — '+e(cls.name):''}</div><div class="fg"><div class="flbl">Title</div><input id="m-at" placeholder="e.g. Chapter Quiz"/></div><div class="fg"><div class="flbl">Grade weight</div><div style="display:flex;gap:6px;margin-top:4px">${['perform','rehearse','prepare'].map(w=>`<div id="wt-${w}" onclick="selWeight('${w}')" style="flex:1;padding:7px 6px;border-radius:8px;border:1.5px solid ${w===S._selWeight?WT[w].col:'var(--bdt)'};background:${w===S._selWeight?WT[w].col+'18':'transparent'};cursor:pointer;text-align:center"><div class="wt-badge ${WT[w].cls}" style="justify-content:center;width:100%">${WT[w].label}</div><div style="font-size:9px;color:var(--ts);margin-top:3px">${w==='perform'?'Exam/Test':w==='rehearse'?'Quiz/Practice':'HW/Reading'}</div></div>`).join('')}</div></div><div class="fg"><div class="flbl">Due date</div><input id="m-ad" type="date"/></div><div class="mac"><button class="btn" onclick="cmod()">Cancel</button><button class="btn bta" onclick="doAddAsgn()">Add</button></div>`;S._selWeight='perform';setTimeout(()=>document.getElementById('m-at')?.focus(),50);}
+  else if(type==='add-slot'){inn.innerHTML=`<div class="mtt">Add class time</div><div class="fg"><div class="flbl">Class</div><select id="m-sc">${S.classes.map(c=>`<option value="${c.id}">${e(c.name)}</option>`).join('')}</select></div><div class="fg"><div class="flbl">Day</div><select id="m-sd"><option value="1">Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option></select></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:9px"><div class="fg"><div class="flbl">Start</div><input id="m-sst" type="time" value="09:00"/></div><div class="fg"><div class="flbl">End</div><input id="m-set" type="time" value="10:30"/></div></div><div class="fg"><div class="flbl">Room</div><input id="m-sr" placeholder="e.g. Room 214"/></div><div class="mac"><button class="btn" onclick="cmod()">Cancel</button><button class="btn bta" onclick="doAddSlot()">Add</button></div>`;}
+  else if(type==='add-event'){inn.innerHTML=`<div class="mtt">Add school event</div><div class="fg"><div class="flbl">Event name</div><input id="m-en" placeholder="e.g. Spring Break"/></div><div class="fg"><div class="flbl">Date</div><input id="m-ed" type="date"/></div><div class="fg"><div class="flbl">Color</div>${swatches(2)}</div><div class="mac"><button class="btn" onclick="cmod()">Cancel</button><button class="btn bta" onclick="doAddEvent()">Add</button></div>`;selCol=ACOLS[2];}
+  else if(type==='add-exam'){inn.innerHTML=`<div class="mtt">Add countdown</div><div class="fg"><div class="flbl">Name</div><input id="m-xn" placeholder="e.g. SAT Exam"/></div><div class="fg"><div class="flbl">Date</div><input id="m-xd" type="date"/></div><div class="fg"><div class="flbl">Color</div>${swatches()}</div><div class="mac"><button class="btn" onclick="cmod()">Cancel</button><button class="btn bta" onclick="doAddExam()">Add</button></div>`;}
+  else if(type==='new-contact'){inn.innerHTML=`<div class="mtt">New conversation</div><div class="fg"><div class="flbl">Name</div><input id="m-cn" placeholder="e.g. Sam Wilson"/></div><div class="fg"><div class="flbl">Color</div>${swatches(4)}</div><div class="mac"><button class="btn" onclick="cmod()">Cancel</button><button class="btn bta" onclick="doAddContact()">Start chat</button></div>`;setTimeout(()=>document.getElementById('m-cn')?.focus(),50);}
+  else if(type==='collab-invite'){
+    const cid=extraClassId||S.selClassId;
+    const allAsgns=S.classes.flatMap(c=>c.assignments.map(a=>({...a,cls:c})));
+    inn.innerHTML=`<div class="mtt">Send collaboration invite</div>
+    <div style="font-size:11.5px;color:var(--ts);margin-bottom:11px">Your collaborator gets their own workspace to contribute. The combined doc saves to both your classes.</div>
+    <div class="fg"><div class="flbl">Select assignment</div><select id="m-ci-asgn" style="font-size:12px">${S.classes.flatMap(c=>c.assignments.map(a=>`<option value="${c.id}|${a.id}" ${c.id===cid&&a.id===extraAsgnId?'selected':''}>[${e(c.name)}] ${e(a.title)} (${WT[a.weight||'prepare'].label})</option>`)).join('')}</select></div>
+    <div class="fg"><div class="flbl">Send to</div><div style="display:flex;flex-direction:column;gap:5px;margin-top:4px">${S.contacts.map(c=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border:.5px solid var(--bdt);border-radius:8px;background:${S.selContact===c.id?'var(--bs)':'transparent'};cursor:pointer" onclick="S.selContact='${c.id}';render();cmod();setTimeout(()=>omod('collab-invite'),100)"><div style="width:24px;height:24px;border-radius:50%;background:${c.color};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:500;color:#fff">${c.initials}</div><div style="flex:1"><div style="font-size:12px;font-weight:500">${e(c.name)}</div><div style="font-size:10px;color:var(--ts)">${c.online?'Online':'Offline'}</div></div>${S.selContact===c.id?`<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="var(--ac)" stroke-width="1.5" stroke-linecap="round"/></svg>`:''}</div>`).join('')}</div></div>
+    <div class="mac"><button class="btn" onclick="cmod()">Cancel</button><button class="btn bta" onclick="doSendCollab()">Send invite</button></div>`;
+  }
+}
+
+function selWeight(w){S._selWeight=w;['perform','rehearse','prepare'].forEach(x=>{const el=document.getElementById('wt-'+x);if(el){el.style.border=`1.5px solid ${x===w?WT[x].col:'var(--bdt)'}`;el.style.background=x===w?WT[x].col+'18':'transparent';}});}
+function doSendCollab(){const sel=document.getElementById('m-ci-asgn')?.value?.split('|');if(!sel||sel.length<2)return;const[cid,aid]=[parseInt(sel[0]),parseInt(sel[1])];sendCollabInvite(cid,aid);}
+function doAddClass(){const n=document.getElementById('m-n')?.value?.trim();if(!n)return;S.classes.push({id:Date.now(),name:n,color:selCol,docs:[],assignments:[],packets:[],flashcards:[],schedule:[]});cmod();render();}
+function doAddDoc(){const n=document.getElementById('m-dn')?.value?.trim(),c=document.getElementById('m-dc')?.value?.trim();if(!n||!c)return;const cls=S.classes.find(x=>x.id===S.selClassId);if(cls)cls.docs.push({id:Date.now(),name:n,content:c,qa:[]});cmod();render();}
+function doAddPkt(){const n=document.getElementById('m-pn')?.value?.trim(),q=document.getElementById('m-pq')?.value?.trim(),t=document.getElementById('m-pt')?.value?.trim()||'';if(!n||!q)return;const cls=S.classes.find(x=>x.id===S.selClassId);if(cls)cls.packets.push({id:Date.now(),name:n,questions:q,textbook:t,messages:[]});cmod();render();}
+function doEditPktQ(){const q=document.getElementById('m-epq')?.value?.trim();if(!q)return;const cls=S.classes.find(c=>c.id===S.selClassId),pkt=cls?.packets.find(p=>p.id===S.selPktId);if(pkt)pkt.questions=q;cmod();render();}
+function doEditPktRef(){const t=document.getElementById('m-epr')?.value?.trim()||'';const cls=S.classes.find(c=>c.id===S.selClassId),pkt=cls?.packets.find(p=>p.id===S.selPktId);if(pkt)pkt.textbook=t;cmod();render();}
+function doAddAsgn(){const t=document.getElementById('m-at')?.value?.trim(),d=document.getElementById('m-ad')?.value;if(!t||!d)return;const cls=S.classes.find(x=>x.id===S.selClassId);if(cls)cls.assignments.push({id:Date.now(),title:t,dueDate:d,done:false,weight:S._selWeight||'prepare'});cmod();render();}
+function doAddSlot(){const cid=parseInt(document.getElementById('m-sc')?.value),day=parseInt(document.getElementById('m-sd')?.value),st=document.getElementById('m-sst')?.value,et=document.getElementById('m-set')?.value,rm=document.getElementById('m-sr')?.value?.trim()||'';if(!cid||!day||!st||!et)return;const cls=S.classes.find(x=>x.id===cid);if(cls)cls.schedule.push({id:Date.now(),day,start:st,end:et,room:rm});cmod();render();}
+function doAddEvent(){const n=document.getElementById('m-en')?.value?.trim(),d=document.getElementById('m-ed')?.value;if(!n||!d)return;S.schoolEvents.push({id:Date.now(),title:n,date:d,color:selCol});cmod();render();}
+function doAddExam(){const n=document.getElementById('m-xn')?.value?.trim(),d=document.getElementById('m-xd')?.value;if(!n||!d)return;S.examDates.push({id:Date.now(),name:n,date:d,color:selCol});cmod();render();}
+function doAddContact(){const n=document.getElementById('m-cn')?.value?.trim();if(!n)return;const id='u'+Date.now();const initials=n.split(' ').map(x=>x[0]?.toUpperCase()||'').join('').slice(0,2);S.contacts.push({id,name:n,initials,color:selCol,online:true});S.threads[id]=[];cmod();S.selContact=id;render();}
+
+async function hdlFile(ev,taId,nameId,fzId){
+  const file=ev.target.files?.[0];if(!file)return;
+  const fz=document.getElementById(fzId);if(fz)fz.innerHTML='<div class="ld"><span></span><span></span><span></span></div> Reading...';
+  let text='';
+  try{const nm=file.name.toLowerCase();
+    if(nm.endsWith('.txt'))text=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsText(file);});
+    else if(nm.endsWith('.pdf')&&typeof pdfjsLib!=='undefined'){const ab=await file.arrayBuffer();const pdf=await pdfjsLib.getDocument({data:new Uint8Array(ab)}).promise;const pgs=[];for(let i=1;i<=Math.min(pdf.numPages,30);i++){const pg=await pdf.getPage(i);const tc=await pg.getTextContent();pgs.push(tc.items.map(x=>x.str).join(' '));}text=pgs.join('\n\n');}
+    else if(nm.endsWith('.docx')&&typeof mammoth!=='undefined'){const ab=await file.arrayBuffer();const res=await mammoth.extractRawText({arrayBuffer:ab});text=res.value;}
+    else text='Could not read. Please paste manually.';
+  }catch(err){text='Error: '+err.message;}
+  if(nameId){const n=document.getElementById(nameId);if(n&&!n.value)n.value=file.name.replace(/\.[^.]+$/,'');}
+  const ta=document.getElementById(taId);if(ta)ta.value=text;
+  if(fz)fz.textContent='Loaded: '+file.name+' ('+text.length+' chars)';
+}
+
+async function askClaude(msgs,sys=''){
+  try{const b={model:'claude-sonnet-4-20250514',max_tokens:1000,messages:msgs};if(sys)b.system=sys;const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});const d=await r.json();return d.content?.[0]?.text||'No response.';}catch(err){return'Error: '+err.message;}
+}
+
+async function doQA(){
+  const inp=document.getElementById('qai'),q=inp?.value?.trim();if(!q||S.qaLoading)return;
+  const cls=S.classes.find(c=>c.id===S.selClassId),doc=cls?.docs.find(d=>d.id===S.selDocId);if(!doc)return;
+  inp.value='';S.qaLoading=true;render();
+  const a=await askClaude([{role:'user',content:`Document:\n\n${doc.content}\n\nQuestion: ${q}`}],'You are a helpful study assistant. Answer accurately based on the document.');
+  doc.qa.push({q,a});S.qaLoading=false;render();
+}
+
+async function doPkt(){
+  const inp=document.getElementById('pkt-in'),q=inp?.value?.trim();if(!q||S.pktLoading)return;
+  const cls=S.classes.find(c=>c.id===S.selClassId),pkt=cls?.packets.find(p=>p.id===S.selPktId);if(!pkt)return;
+  inp.value='';pkt.messages.push({role:'user',content:q});S.pktLoading=true;render();
+  const sys=`You are a study assistant helping complete a packet. QUESTION PACKET:\n${pkt.questions}\n\n${pkt.textbook?'TEXTBOOK:\n'+pkt.textbook:'(No textbook)'}`;
+  const a=await askClaude(pkt.messages.map(m=>({role:m.role==='user'?'user':'assistant',content:m.content})),sys);
+  pkt.messages.push({role:'ai',content:a});S.pktLoading=false;render();
+  setTimeout(()=>{const el=document.getElementById('pkt-msgs');if(el)el.scrollTop=el.scrollHeight;},50);
+}
+
+async function doFlash(){
+  const cls=S.classes.find(c=>c.id===S.selClassId);if(!cls||S.fcLoading)return;
+  const srcEl=document.getElementById('fc-src');if(!srcEl)return;
+  const val=srcEl.value;let content='';
+  if(val.startsWith('doc-')){const d=cls.docs.find(x=>x.id===parseInt(val.replace('doc-','')));content=d?.content||'';}
+  else if(val.startsWith('pkt-')){const p=cls.packets.find(x=>x.id===parseInt(val.replace('pkt-','')));content=p?(p.questions+(p.textbook?'\n\n'+p.textbook:'')):'';}
+  if(!content)return;S.fcLoading=true;render();
+  const resp=await askClaude([{role:'user',content:`Generate 8 flashcards. Return ONLY JSON array:\n[{"q":"...","a":"..."},...]\n\n${content.slice(0,3000)}`}],'Return ONLY a valid JSON array. No markdown, no extra text.');
+  try{const cards=JSON.parse(resp.replace(/```json|```/g,'').trim());cards.forEach(c=>cls.flashcards.push({id:Date.now()+Math.random(),q:c.q,a:c.a}));}catch(err){}
+  S.fcLoading=false;flipSt={};render();
+}
+
+async function doChat(){
+  const inp=document.getElementById('chat-in'),q=inp?.value?.trim();if(!q||S.chatLoading)return;
+  inp.value='';S.chatMsgs.push({role:'user',content:q});S.chatLoading=true;render();
+  const a=await askClaude(S.chatMsgs.map(m=>({role:m.role==='user'?'user':'assistant',content:m.content})),'You are a helpful, knowledgeable assistant. Answer clearly and helpfully.');
+  S.chatMsgs.push({role:'ai',content:a});S.chatLoading=false;render();
+}
+
+async function doWrite(){
+  const ta=document.getElementById('write-in'),inp=ta?.value?.trim();if(!inp||S.writeLoading)return;
+  S.writeInput=inp;S.writeLoading=true;S.writeOut=null;render();
+  const resp=await askClaude([{role:'user',content:inp}],`You are an expert writing coach reviewing a ${S.writeTone} draft. Return ONLY JSON:\n{"sections":[{"label":"Overall Impression","body":"..."},{"label":"Strengths","body":"..."},{"label":"Areas to Improve","body":"..."},{"label":"Specific Suggestions","body":"..."},{"label":"Revised Opening","body":"..."}]}`);
+  try{S.writeOut=JSON.parse(resp.replace(/```json|```/g,'').trim());}catch{S.writeOut={sections:[{label:'Feedback',body:resp}]};}
+  S.writeLoading=false;render();
+}
+
+async function doSum(){
+  const ta=document.getElementById('sum-in'),inp=ta?.value?.trim();if(!inp||S.sumLoading)return;
+  S.sumInput=inp;S.sumLoading=true;S.sumOut='';render();
+  const out=await askClaude([{role:'user',content:inp}],'Summarize clearly for a student:\n\nOverview:\n(2-3 sentences)\n\nMain Points:\n• ...\n\nKey Details:\n• ...\n\nTakeaways:\n• ...');
+  S.sumOut=out;S.sumLoading=false;render();
+}
+
+render();
+</script></div></body></html>
